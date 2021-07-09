@@ -1,4 +1,6 @@
 const graphql = require('graphql');
+const Author = require('../models/Author');
+const Book = require('../models/Book');
 
 const {
     GraphQLObjectType,
@@ -68,8 +70,10 @@ const RootQuery = new GraphQLObjectType({
         book: {
             type: BookType,
             args: { id: { type: GraphQLID } },
-            resolve(parent, args) {
-                return books.find(book => book.id === args.id)
+            async resolve(parent, args) {
+                const books = await Book.find(book => book.id === args.id)
+                return books
+                // return books.find(book => book.id === args.id)
             }
         },
         author: {
@@ -90,6 +94,45 @@ const RootQuery = new GraphQLObjectType({
     }
 });
 
+const Mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        addAuthor: {
+            type: AuthorType,
+            args: {
+                name: { type: GraphQLString },
+                age: { type: GraphQLInt }
+            },
+            async resolve(parent, args) {
+                const { name, age } = args
+                let author = new Author({
+                    name,
+                    age
+                });
+                return await author.save()
+            }
+        },
+        addBook: {
+            type: BookType,
+            args: {
+                name: { type: GraphQLString },
+                genre: { type: GraphQLString },
+                authorId: { type: GraphQLID }
+            },
+            async resolve(parent, args) {
+                const { name, genre, authorId } = args
+                let book = new Book({
+                    name,
+                    genre,
+                    authorId
+                });
+                return await book.save()
+            }
+        }
+    }
+});
+
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation: Mutation
 });
