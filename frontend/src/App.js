@@ -12,6 +12,7 @@ const client = new ApolloClient({
 export default function App() {
     return (
         <ApolloProvider client={client}>
+            <h1 className="title">My Reading List</h1>
             <BookList />
             <AddBook />
         </ApolloProvider>
